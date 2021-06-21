@@ -1,0 +1,23 @@
+.layer{
+    position:relative;
+    width:100%;
+}
+
+
+.layer04-panel{
+    position:relative;
+    float:left;
+    height:100%;
+    width:96%;
+}
+.layer04-panel-label{
+    width:100%;
+    height:22%;
+    color: #0EFCFF;
+    padding-top:5px;
+    font-size: 20px;
+}
+.layer04-panel-chart{
+    width:100%;
+    height:85%;
+}

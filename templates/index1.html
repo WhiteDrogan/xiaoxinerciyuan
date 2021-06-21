@@ -1,0 +1,821 @@
+
+    <!doctype html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="keywords" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>客流分析系统后台管理</title>
+        <link type="text/css" href="static/css/public.css" rel="stylesheet">
+        <link type="text/css" href="static/css/icon.css" rel="stylesheet">
+        <link type="text/css" href="static/css/index.css" rel="stylesheet">
+        <link type="text/css" href="static/css/cube.css" rel="stylesheet">
+
+        <script type="text/javascript">
+            document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 100 + 'px';
+        </script>
+
+        <script>
+            function get_time() {
+                var today = new Date();
+                var hour = today.getHours();
+                var minute = today.getMinutes();
+                var sec = today.getSeconds();
+                var timestr = "";
+                hour = hour < 10 ? "0" + hour : hour;
+                minute = minute < 10 ? "0" + minute : minute;
+                sec = sec < 10 ? "0" + sec : sec;
+                timestr = hour + ":" + minute + ":" + sec;
+                document.form1.time.value = timestr;
+                setTimeout("get_time()", 1000);
+            }
+        </script>
+
+
+        <script type="text/javascript">
+
+            Date.prototype.strftime = function (format) {
+
+                var o = {
+
+                    "M+": this.getMonth() + 1,  //month
+
+                    "d+": this.getDate(),     //day
+
+
+                }
+
+                if (/(y+)/.test(format)) {
+
+                    format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+
+                }
+
+                for (var k in o) {
+
+                    if (new RegExp("(" + k + ")").test(format)) {
+
+                        format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+
+                    }
+
+                }
+
+                return format;
+
+            }
+
+            function UTCToLocalTimeString(d, format) {
+
+                var timeOffsetInHours = (new Date().getTimezoneOffset() / 60) + -10;
+
+                d.setHours(d.getHours() + timeOffsetInHours);
+
+                return d.strftime(format);
+
+            }
+
+        </script>
+
+        <script>
+
+            setInterval(function () {
+                var time = UTCToLocalTimeString(new Date(), 'yyyy年MM月dd日 ');
+                document.getElementById("bjTime").innerHTML = time;
+            }, 1000);
+
+        </script>
+
+
+        <script src="static/js/echarts.min.js"></script>
+    </head>
+    <style>
+        .abc {
+
+        }
+
+    </style>
+
+<body>
+<div class="bg">
+
+    <div class="title"> 地铁客流分析系统</div>
+    <div class="leftMain">
+        <div class="leftMain_top">
+            <div class="">
+                <ul>
+                    <li>
+                        <div class="liIn2">
+                            <!--时间显示-->
+                            <form name="form1">
+                                <input name="time" type="text" style="border:none" readonly class="timetop" size="10"/>
+                                <p><span class="timebuttom" id="bjTime"></span></p>
+                            </form>
+                            <script> get_time(); </script>
+
+
+                            <!--<p class="shu"><span class="shu3">2890.39</span><i>元</i></p>
+                            <div class="zi"><span class="span1">小标题：文字</span><span>小标题：文字</span></div>-->
+                            <span class="border_bg_leftTop"></span>
+                            <span class="border_bg_rightTop"></span>
+                            <span class="border_bg_leftBottom"></span>
+                            <span class="border_bg_rightBottom"></span>
+                        </div>
+                    </li>
+
+                    <li>
+                        <div class="liIn2">
+
+                            <!--天气显示-->
+
+                            <iframe width="400" scrolling="no" height="100" frameborder="0" allowtransparency="true"
+                                    src="https://i.tianqi.com?c=code&id=35&color=%23FFFFFF&icon=2&site=34"></iframe>
+
+                            <span class="border_bg_leftTop"></span>
+                            <span class="border_bg_rightTop"></span>
+                            <span class="border_bg_leftBottom"></span>
+                            <span class="border_bg_rightBottom"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="liIn" style="border: none">
+                            <div class="content">
+                                <div class="photo-cube__wrapper">
+                                    <input type="radio" id="1" name="cube" checked="true" class="photo-cube__control"/>
+                                    <input type="radio" id="2" name="cube" class="photo-cube__control"/>
+                                    <input type="radio" id="3" name="cube" class="photo-cube__control"/>
+                                    <input type="radio" id="4" name="cube" class="photo-cube__control"/>
+                                    <input type="radio" id="5" name="cube" class="photo-cube__control"/>
+                                    <input type="radio" id="6" name="cube" class="photo-cube__control"/>
+                                    <div class="photo-cube">
+                                        <div class="photo-cube__panel"></div>
+                                        <div class="photo-cube__panel"></div>
+                                        <div class="photo-cube__panel"></div>
+                                        <div class="photo-cube__panel"></div>
+                                        <div class="photo-cube__panel"></div>
+                                        <div class="photo-cube__panel"></div>
+                                    </div>
+                                    <div class="photo-cube__actions--left">
+                                        <label for="6" class="photo-cube__action"></label>
+                                        <label for="1" class="photo-cube__action"></label>
+                                        <label for="2" class="photo-cube__action"></label>
+                                        <label for="3" class="photo-cube__action"></label>
+                                        <label for="4" class="photo-cube__action"></label>
+                                        <label for="5" class="photo-cube__action"></label>
+                                    </div>
+                                    <div class="photo-cube__actions--right">
+                                        <label for="2" class="photo-cube__action"></label>
+                                        <label for="3" class="photo-cube__action"></label>
+                                        <label for="4" class="photo-cube__action"></label>
+                                        <label for="5" class="photo-cube__action"></label>
+                                        <label for="6" class="photo-cube__action"></label>
+                                        <label for="1" class="photo-cube__action"></label>
+                                    </div>
+                                    <div class="photo-cube__indicators">
+                                        <label for="1" class="photo-cube__indicator"></label>
+                                        <label for="2" class="photo-cube__indicator"></label>
+                                        <label for="3" class="photo-cube__indicator"></label>
+                                        <label for="4" class="photo-cube__indicator"></label>
+                                        <label for="5" class="photo-cube__indicator"></label>
+                                        <label for="6" class="photo-cube__indicator"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div class="leftMain_middle">
+            <div class="leftMain_middle_left">
+                <div class="leftMain_middle_leftIn">
+                    <h3>本月总客流量变化</h3>
+                    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                    <div class="biaoge" style="width:100%; height:25vh" id="chartmain"></div>
+                    <script type="text/javascript">
+                        //window.onload = function () {
+                        //指定图表的配置项和数据
+                        var dataAxis = ['11日', '12日', '13日', '14日', '15日', '16日','17日','18日','19日','20日', '21日', '22日', '23日', '24日', '25日'];
+                        var data = [2501860,2168564,2063588,2397167,2306251,2417059,2474773,2664403,2209338,2113641,2465959,2476308,2523962,2517370,2576182];
+                        var yMax = 500;
+                        var dataShadow = [];
+
+                        for (var i = 0; i < data.length; i++) {
+                            dataShadow.push(yMax);
+                        }
+
+                        option = {
+                            title: {
+                                text: '',
+                                subtext: ''
+                            },
+                            grid: {
+                                x: 65,
+                                y: 40,
+                                x2: 80,
+                                y2: 20,
+
+                            },
+                            xAxis: {
+                                data: dataAxis,
+                                axisLabel: {
+                                    /*inside: true,*/
+                                    interval: 0,
+                                    textStyle: {
+                                        color: '#fff',
+                                        fontSize: 12
+
+                                    }
+                                },
+                                axisTick: {
+                                    show: false,
+                                },
+                                axisLine: {
+                                    show: true,
+                                    symbol: ['none', 'arrow'],
+                                    symbolOffset: 12,
+                                    lineStyle: {
+                                        color: '#fff',
+                                    }
+                                },
+                                z: 10
+                            },
+                            yAxis: {
+                                type: 'value',
+                                name: '单位：人次',
+                                axisLine: {
+                                    show: true,
+                                    symbol: ['none', 'arrow'],
+                                    symbolOffset: 12,
+                                    lineStyle: {
+                                        color: '#fff',
+                                    }
+                                },
+                                axisTick: {
+                                    show: false
+                                },
+                                axisLabel: {
+                                    textStyle: {
+                                        color: '#fff',
+                                        fontSize: 12
+                                    }
+                                }
+                            },
+
+                            dataZoom: [
+                                {
+                                    type: 'inside'
+                                }
+                            ],
+                            series: [
+                                { // For shadow
+                                    type: 'bar',
+                                    itemStyle: {
+                                        color: 'rgba(0,0,0,0.05)'
+                                    },
+                                    barGap: '-100%',
+                                    barCategoryGap: '40%',
+                                    data: dataShadow,
+                                    animation: false
+                                },
+                                {
+                                    type: 'bar',
+                                    itemStyle: {
+                                        color: new echarts.graphic.LinearGradient(
+                                            0, 0, 0, 1,
+                                            [
+                                                {offset: 0, color: '#0efdff'},
+                                                {offset: 0.5, color: '#188df0'},
+                                                {offset: 1, color: '#188df0'}
+                                            ]
+                                        )
+                                    },
+                                    emphasis: {
+                                        itemStyle: {
+                                            color: new echarts.graphic.LinearGradient(
+                                                0, 0, 0, 1,
+                                                [
+                                                    {offset: 0, color: '#2378f7'},
+                                                    {offset: 0.7, color: '#2378f7'},
+                                                    {offset: 1, color: '#0efdff'}
+                                                ]
+                                            )
+                                        }
+                                    },
+                                    data: data
+                                }
+                            ]
+                        };
+
+                        // Enable data zoom when user click bar.
+                        /*var zoomSize = 6;
+                        myChart.on('click', function (params) {
+                            console.log(dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)]);
+                            myChart.dispatchAction({
+                                type: 'dataZoom',
+                                startValue: dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)],
+                                endValue: dataAxis[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
+                            });
+                        });*/
+
+                        //获取dom容器
+                        var myChart = echarts.init(document.getElementById('chartmain'));
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                        //};
+                    </script>
+                    <span class="border_bg_leftTop"></span>
+                    <span class="border_bg_rightTop"></span>
+                    <span class="border_bg_leftBottom"></span>
+                    <span class="border_bg_rightBottom"></span>
+                </div>
+            </div>
+            <div class="leftMain_middle_right">
+                <div class="leftMain_middle_rightIn">
+
+                    <!--在这里的进度条。cube-->
+
+
+                    <h3>明日拥挤站点预测</h3>
+                    <div id="prediction_pic" class="biaoge biaoge_pai" style="width:100%; height:25vh">
+                        <script type="text/javascript">
+                        var salvProName ={{ sta }};
+                        var salvProValue ={{ flow }};
+                        var salvProMax =[];//背景按最大值
+                        for (let i = 0; i < salvProValue.length; i++) {
+                            salvProMax.push(salvProValue[0])
+                        }
+                        option = {
+                            grid: {
+                                left: '2%',
+                                right: '2%',
+                                bottom: '2%',
+                                top: '2%',
+                                containLabel: true
+                            },
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'none'
+                                },
+                                formatter: function(params) {
+                                    return params[0].name  + ' : ' + params[0].value
+                                }
+                            },
+                            xAxis: {
+                                show: false,
+                                type: 'value'
+                            },
+                            yAxis: [{
+                                type: 'category',
+                                inverse: true,
+                                axisLabel: {
+                                    show: true,
+                                    textStyle: {
+                                        color: '#fff'
+                                    },
+                                },
+                                splitLine: {
+                                    show: false
+                                },
+                                axisTick: {
+                                    show: false
+                                },
+                                axisLine: {
+                                    show: false
+                                },
+                                data: salvProName
+                            }, {
+                                type: 'category',
+                                inverse: true,
+                                axisTick: 'none',
+                                axisLine: 'none',
+                                show: true,
+                                axisLabel: {
+                                    textStyle: {
+                                        color: '#ffffff',
+                                        fontSize: '12'
+                                    },
+                                },
+                                data:salvProValue
+                            }],
+                            series: [{
+                                    name: '值',
+                                    type: 'bar',
+                                    zlevel: 1,
+                                    itemStyle: {
+                                        normal: {
+                                            barBorderRadius: 30,
+                                            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                                                offset: 0,
+                                                color: 'rgb(57,89,255,1)'
+                                            }, {
+                                                offset: 1,
+                                                color: 'rgb(46,200,207,1)'
+                                            }]),
+                                        },
+                                    },
+                                    barWidth: 15,
+                                    data: salvProValue
+                                },
+                                {
+                                    name: '背景',
+                                    type: 'bar',
+                                    barWidth: 15,
+                                    barGap: '-100%',
+                                    data: salvProMax,
+                                    itemStyle: {
+                                        normal: {
+                                            color: 'rgba(24,31,68,1)',
+                                            barBorderRadius: 30,
+                                        }
+                                    },
+                                },
+                            ]
+                        };
+                        //获取dom容器
+                        var myChart = echarts.init(document.getElementById('prediction_pic'));
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+
+
+                        </script>
+                    </div>
+                    <span class="border_bg_leftTop"></span>
+                    <span class="border_bg_rightTop"></span>
+                    <span class="border_bg_leftBottom"></span>
+                    <span class="border_bg_rightBottom"></span>
+                </div>
+            </div>
+        </div>
+        <div class="leftMain_middle">
+            <div class="leftMain_middle_left">
+                <div class="leftMain_middle_leftIn">
+                    <h3>断面客流量</h3>
+                    <div class="biaoge" style="width:100%; height:25vh" id="flow_between"></div>
+                    <script type="text/javascript">
+                        //window.onload = function (){
+                        //指定图表的配置项和数据
+
+                        var fontColor = '#30eee9';
+                        option = {
+                            grid: {
+                                left: '5%',
+                                right: '10%',
+                                top: '20%',
+                                bottom: '15%',
+                                containLabel: true
+                            },
+                            tooltip: {
+                                show: true,
+                                trigger: 'item'
+                            },
+                            legend: {
+                                show: true,
+                                x: 'center',
+                                y: '35',
+                                icon: 'stack',
+                                itemWidth: 10,
+                                itemHeight: 10,
+                                textStyle: {
+                                    color: '#1bb4f6'
+                                },
+                                data: ['上行客流', '下行客流']
+                            },
+                            xAxis: [{
+                                type: 'category',
+                                boundaryGap: false,
+                                axisLabel: {
+                                    color: fontColor
+                                },
+                                axisLine: {
+                                    show: true,
+                                    lineStyle: {
+                                        color: '#397cbc'
+                                    }
+                                },
+                                axisTick: {
+                                    show: false,
+                                },
+                                splitLine: {
+                                    show: false,
+                                    lineStyle: {
+                                        color: '#195384'
+                                    }
+                                },
+                                data: ['断面1', '断面2', '断面3', '断面4', '断面5', '断面6', '断面7', '断面8', '断面9', '断面10',
+                                    '断面11', '断面12']
+                            }],
+                            yAxis: [{
+                                    type: 'value',
+                                    name: '',
+                                    min: 0,
+                                    max: 50000,
+                                    axisLabel: {
+                                        formatter: '{value}',
+                                        textStyle: {
+                                            color: '#2ad1d2'
+                                        }
+                                    },
+                                    axisLine: {
+                                        lineStyle: {
+                                            color: '#27b4c2'
+                                        }
+                                    },
+                                    axisTick: {
+                                        show: false,
+                                    },
+                                    splitLine: {
+                                        show: true,
+                                        lineStyle: {
+                                            color: '#11366e'
+                                        }
+                                    }
+                                },
+
+                            ],
+                            series: [{
+                                    name: '上行客流',
+                                    type: 'line',
+                                    stack: '总量',
+                                    symbol: 'circle',
+                                    symbolSize: 8,
+                                    itemStyle: {
+                                        normal: {
+                                            color: '#0092f6',
+                                            lineStyle: {
+                                                color: "#0092f6",
+                                                width: 1
+                                            },
+
+                                        }
+                                    },
+                                    markPoint: {
+                                        itemStyle: {
+                                            normal: {
+                                                color: 'red'
+                                            }
+                                        }
+                                    },
+                                    data: [3843, 7106, 10675, 11916, 13329, 13415, 13915, 14268, 15246, 16016, 16910, 10493, 10463, 9842, 7561, 7077, 2598, 1396]
+                                },
+                                {
+                                    name: '下行客流',
+                                    type: 'line',
+                                    stack: '总量',
+                                    symbol: 'circle',
+                                    symbolSize: 8,
+
+                                    itemStyle: {
+                                        normal: {
+                                            color: '#00d4c7',
+                                            lineStyle: {
+                                                color: "#00d4c7",
+                                                width: 1
+                                            },
+                                        }
+                                    },
+                                    data: [3775, 6963, 10753, 11891, 13271, 13204, 13730, 13990, 14771, 15336, 15897, 10004, 9999, 9234, 6859, 6213, 2382, 1414]
+                                },
+
+                            ]
+                        };
+                        //获取dom容器
+                        var myChart = echarts.init(document.getElementById('flow_between'));
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+
+                        //};
+                    </script>
+
+                    <span class="border_bg_leftTop"></span>
+                    <span class="border_bg_rightTop"></span>
+                    <span class="border_bg_leftBottom"></span>
+                    <span class="border_bg_rightBottom"></span>
+                </div>
+            </div>
+            <div class="leftMain_middle_right">
+                <div class="leftMain_middle_rightIn">
+
+                    <a href="/map"><img src="static/images/a4.png" width="400px" ; height="400px" ;></a><!--这个size在F11全屏正常显示否则改小高度大约245px-->
+
+                    <span class="border_bg_leftTop"></span>
+                    <span class="border_bg_rightTop"></span>
+                    <span class="border_bg_leftBottom"></span>
+                    <span class="border_bg_rightBottom"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="rightMain">
+        <div class="rightMain_top">
+            <div class="rightMain_topIn">
+                <h3>客流年龄结构分布</h3>
+                <div class="biaoge" style="width:100%; height:30vh" id="chartmain_bing"></div>
+                <script type="text/javascript">
+                    option = {
+
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        },
+                        legend: {
+                            // orient: 'vertical',
+                            // top: 'middle',
+                            type: 'scroll',
+                            orient: 'vertical',
+                            right: 10,
+                            top: 55,
+                            bottom: 20,
+                            left: 'right',
+                            data: ['老年', '中年', '青年', '少年'],
+                            textStyle: {
+                                color: '#fff',
+                                fontSize: 12
+                            }
+
+
+                        },
+                        grid: {
+                            x: '-10%',
+                            y: 40,
+                            x2: 20,
+                            y2: 20,
+                        },
+                        color: ['#F90', '#6F0', '#3ff', '#63F'],
+                        series: [
+                            {
+                                type: 'pie',
+                                radius: '65%',
+                                center: ['50%', '50%'],
+                                selectedMode: 'single',
+                                data: [
+
+                                    {value: {{ old }}, name: '老年'},
+                                    {value: {{ middleAged }}, name: '中年'},
+                                    {value: {{ teen }}, name: '青年'},
+                                    {value: {{ youth }}, name: '少年'}
+                                ],
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                    //获取dom容器
+                    var myChart = echarts.init(document.getElementById('chartmain_bing'));
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(option);
+
+                </script>
+                <span class="border_bg_leftTop"></span>
+                <span class="border_bg_rightTop"></span>
+                <span class="border_bg_leftBottom"></span>
+                <span class="border_bg_rightBottom"></span>
+            </div>
+        </div>
+        <div class="rightMain_bottom">
+            <div class="rightMain_bottomIn">
+                <h3>早晚高峰客流信息</h3>
+                <div class="biaoge biaoge_list" style="width:100%; height:36vh">
+                    <div class="biaoge_listIn">
+                        <ul class="ul_title">
+                            <li>日期</li>
+                            <li>早高峰</li>
+                            <li>晚高峰</li>
+
+                        </ul>
+                        <div class="ul_list">
+                            <div class="ul_listIn">
+                                <ul class="ul_con">
+                                    <li>周一</li>
+                                    <li>550930</li>
+                                    <li>432469</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周二</li>
+                                    <li>523178</li>
+                                    <li>440116</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周三</li>
+                                    <li>522062</li>
+                                    <li>443368</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周四</li>
+                                    <li>515989</li>
+                                    <li>438783</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周五</li>
+                                    <li>505903</li>
+                                    <li>448933</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周六</li>
+                                    <li>171266</li>
+                                    <li>351953</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周日</li>
+                                    <li>176914</li>
+                                    <li>352419</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                  <li>周一</li>
+                                    <li>550930</li>
+                                    <li>432469</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周二</li>
+                                    <li>523178</li>
+                                    <li>440116</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周三</li>
+                                    <li>522062</li>
+                                    <li>443368</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                 <li>周四</li>
+                                    <li>515989</li>
+                                    <li>438783</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周五</li>
+                                    <li>505903</li>
+                                    <li>448933</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                    <li>周六</li>
+                                    <li>171266</li>
+                                    <li>351953</li>
+
+                                </ul>
+                                <ul class="ul_con">
+                                   <li>周日</li>
+                                    <li>176914</li>
+                                    <li>352419</li>
+
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <span class="border_bg_leftTop"></span>
+                <span class="border_bg_rightTop"></span>
+                <span class="border_bg_leftBottom"></span>
+                <span class="border_bg_rightBottom"></span>
+            </div>
+
+{#            <a class="title_admin" href="/station154" target="blank">预测</a>#}
+
+        </div>
+    </div>
+    <div style="clear:both;"></div>
+
+
+</div>
+
+
+<!--数字增长累加动画-->
+<script src="js/jquery-1.11.0.min.js" type="text/javascript"></script>
+<script src="js/jquery.numscroll.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    $(".shu1").numScroll();
+    $(".shu2").numScroll();
+    $(".shu3").numScroll();
+    $(".shu4").numScroll();
+    $(".shu5").numScroll();
+    $(".shu6").numScroll();
+
+    /*$(".num2").numScroll({
+        time:5000
+    });*/
+</script>
+
+
+</body>
+</html>
